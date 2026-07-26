@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaGRIS – Formulaire Espèce</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue:       #1a6b8a;
+    --blue-dark:  #0d4a63;
+    --blue-light: #e8f4f8;
+    --blue-mid:   #cde0ea;
+    --bg:         #f0f4f7;
+    --white:      #ffffff;
+    --gray:       #f5f5f5;
+    --text:       #222;
+    --text-light: #666;
+    --red:        #dc3545;
+    --border:     #dce6ec;
+    --radius:     10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.93rem;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .fao-header {
+    background: linear-gradient(135deg, #1a6b8a 0%, #0d4a63 100%);
+    color: white;
+    padding: 16px 28px;
+    margin-bottom: 22px;
+    border-radius: 0 0 14px 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.15);
+  }
+  .fao-logo-wrap {
+    width: 50px; height: 50px;
+    background: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 1.6rem;
+  }
+  .fao-title    { font-family: 'Source Serif 4', serif; font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
+  .fao-subtitle { font-size: 0.8rem; opacity: .82; margin-top: 2px; }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 18px 40px; }
+
+  /* ── PROGRESS ── */
+  .progress-wrap  { margin-bottom: 20px; }
+  .progress-label { font-size: .82rem; color: #555; margin-bottom: 4px; font-weight: 500; }
+  .progress-track { height: 8px; border-radius: 4px; background: #d5e8f0; overflow: hidden; }
+  .progress-bar   { height: 100%; width: 0%; background: var(--blue); border-radius: 4px; transition: width .4s ease; }
+
+  /* ── TABS ── */
+  .tabs       { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 18px; }
+  .tab-btn    { padding: 9px 20px; background: none; border: none; font-family: inherit; font-size: .93rem; font-weight: 500; color: #555; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: color .2s; }
+  .tab-btn.active { color: var(--blue); font-weight: 700; border-bottom-color: var(--blue); }
+  .tab-panel  { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── CARDS ── */
+  .card-section {
+    background: white; border-radius: var(--radius);
+    padding: 20px 26px; margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    border-left: 4px solid transparent;
+    transition: border-left-color .2s;
+  }
+  .card-section:focus-within { border-left-color: var(--blue); }
+  .section-title {
+    color: var(--blue); font-weight: 700; font-size: 1rem;
+    border-bottom: 2px solid #e0ecf3; padding-bottom: 8px;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ── SUBSECTION ── */
+  .subsection {
+    background: #f5fafc; border-left: 3px solid var(--blue);
+    padding: 14px 16px; border-radius: 0 8px 8px 0; margin-bottom: 14px;
+  }
+  .subsection-title { font-weight: 600; color: var(--blue); margin-bottom: 10px; font-size: .9rem; }
+
+  /* ── GRID ── */
+  .row  { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+  .row:last-child { margin-bottom: 0; }
+  .col-3  { flex: 0 0 calc(25% - 9px); min-width: 140px; }
+  .col-4  { flex: 0 0 calc(33.33% - 8px); min-width: 180px; }
+  .col-6  { flex: 0 0 calc(50% - 6px); min-width: 220px; }
+  .col-8  { flex: 0 0 calc(66.66% - 4px); min-width: 240px; }
+  .col-12 { flex: 0 0 100%; }
+
+  /* ── FORM ELEMENTS ── */
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-label { font-weight: 500; color: #333; font-size: .88rem; }
+  .help-icon  { color: var(--blue); font-size: .78rem; margin-left: 3px; cursor: help; vertical-align: super; }
+  .required   { color: var(--red); margin-left: 2px; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: .9rem;
+    color: var(--text);
+    background: white;
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(26,107,138,.12);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+
+  /* ── CHECKBOXES ── */
+  .checkbox-group { display: flex; flex-direction: column; gap: 6px; }
+  .checkbox-item  { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: .9rem; }
+  .checkbox-item input { width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0; accent-color: var(--blue); }
+
+  /* ── HR ── */
+  hr.subtle { border: none; border-top: 1px solid #e8ecef; margin: 14px 0; }
+
+  /* ── CONDITIONAL ── */
+  .conditional { display: none; }
+  .conditional.visible { display: block; }
+
+  /* ── DYNAMIC ITEMS ── */
+  .dynamic-item {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 10px;
+    background: #fafcfd; position: relative;
+  }
+  .btn-remove-item {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--red); color: white; border: none;
+    border-radius: 50%; width: 22px; height: 22px;
+    font-size: .75rem; cursor: pointer; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-add-item {
+    background: var(--blue-light); color: var(--blue);
+    border: 1.5px dashed var(--blue);
+    border-radius: 8px; padding: 7px 18px; font-weight: 600;
+    font-size: .87rem; cursor: pointer; width: 100%;
+    margin-top: 6px; font-family: inherit;
+    transition: background .15s;
+  }
+  .btn-add-item:hover { background: #d0eaf5; }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    background: var(--blue); color: white;
+    border: none; padding: 10px 28px; border-radius: 8px;
+    font-weight: 600; font-size: .95rem; cursor: pointer;
+    font-family: inherit; transition: background .2s;
+  }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-tab-nav {
+    background: var(--blue-light); color: var(--blue);
+    border: 1.5px solid var(--blue); padding: 9px 24px;
+    border-radius: 8px; font-weight: 600; font-size: .9rem;
+    cursor: pointer; font-family: inherit; transition: background .2s;
+  }
+  .btn-tab-nav:hover { background: var(--blue-mid); }
+
+  /* ── RECAP ── */
+  .recap-header {
+    background: var(--blue); color: white; font-weight: 700;
+    font-size: 1.05rem; border-radius: 8px 8px 0 0;
+    padding: 12px 18px;
+  }
+  .recap-body {
+    border: 1px solid var(--blue-mid); border-top: none;
+    border-radius: 0 0 8px 8px; padding: 18px 20px; margin-bottom: 22px;
+  }
+  .recap-section-title {
+    font-weight: 700; font-size: 1rem; color: var(--blue);
+    border-bottom: 2px solid #e0ecf3; padding-bottom: 6px;
+    margin-bottom: 10px; margin-top: 18px;
+  }
+  .recap-section-title:first-child { margin-top: 0; }
+  .recap-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+  .recap-table td { padding: 5px 10px 5px 0; vertical-align: top; font-size: .9rem; }
+  .recap-table td:first-child { font-weight: 600; color: var(--blue); width: 45%; }
+  .recap-empty { color: #aaa; font-style: italic; }
+
+  /* ── MAIL STEP ── */
+  .step-wrap { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 18px; }
+  .step-num {
+    background: var(--blue); color: white; font-weight: 700;
+    font-size: 1.1rem; border-radius: 50%; width: 34px; height: 34px;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  }
+  .step-num.alt { background: var(--blue-dark); }
+  .mail-box {
+    background: #f0f7ff; border: 1px solid #b8d6f0;
+    border-radius: 8px; padding: 12px 16px;
+    font-size: .9rem; color: #2c5f8a;
+  }
+
+  /* ── PRINT / COPY JSON ── */
+  .export-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+
+  /* ── ALERT ── */
+  .info-alert {
+    background: var(--blue-light); border-left: 4px solid var(--blue);
+    border-radius: 0 8px 8px 0; padding: 10px 14px;
+    font-size: .85rem; color: var(--blue); margin-bottom: 14px;
+  }
+
+  /* ── COPY TOAST ── */
+  #toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: #1a6b8a; color: white; padding: 10px 20px;
+    border-radius: 8px; font-size: .9rem; font-weight: 600;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity .3s, transform .3s; pointer-events: none; z-index: 9999;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  @media(max-width: 768px) {
+    .col-3, .col-4, .col-6, .col-8 { flex: 0 0 100%; }
+    .card-section { padding: 14px 14px; }
+    .fao-header   { padding: 12px 14px; }
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="fao-header">
+  <div class="fao-logo-wrap">🐟</div>
+  <div>
+    <div class="fao-title">AquaGRIS – Formulaire Espèce</div>
+    <div class="fao-subtitle">Food and Agriculture Organization of the United Nations &nbsp;|&nbsp; <span style="opacity:.7;">Aquatic Genetic Resources Information System</span></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-label" id="prog-label">Progression du formulaire : 0%</div>
+    <div class="progress-track"><div class="progress-bar" id="prog-bar"></div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-espece', this)">🐟 Espèce</button>
+    <button class="tab-btn"        onclick="switchTab('tab-recap',  this)">📄 Récapitulatif</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       ONGLET 1 – ESPÈCE
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-espece">
+
+    <!-- Identification -->
+    <div class="card-section">
+      <div class="section-title">🌍 Identification du déclarant</div>
+      <div class="row">
+        <div class="col-6">
+          <div class="form-group">
+            <label class="form-label" for="contact">NOM Prénom</label>
+            <input type="text" id="contact" placeholder="">
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            <label class="form-label" for="email">Email</label>
+            <input type="email" id="email" placeholder="">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Espèce -->
+    <div class="card-section">
+      <div class="section-title">🔬 Espèce</div>
+      <div class="row">
+        <div class="col-4">
+          <div class="form-group">
+            <label class="form-label" for="groupe_taxo">Groupe taxonomique</label>
+            <select id="groupe_taxo" onchange="updateEspeces()">
+              <option value=""></option>
+              <option>Algues et plantes aquatiques</option>
+              <option>Crustacés</option>
+              <option>Poissons d'eau douce et euryhalins</option>
+              <option>Poissons marins</option>
+              <option>Mollusques</option>
+              <option>Animaux aquatiques divers</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label class="form-label" for="nom_espece">Nom de l'espèce</label>
+            <input type="text" id="nom_espece" placeholder="ex. Sparus aurata – Daurade royale" oninput="updateProgress()">
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label class="form-label" for="nom_commun">Nom commun officiel ou communément utilisé en France</label>
+            <input type="text" id="nom_commun" placeholder="">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          <div class="form-group">
+            <label class="form-label" for="espece_native">Espèce native dans votre pays ?</label>
+            <select id="espece_native" onchange="toggleNonNative()">
+              <option value="">(aucun)</option>
+              <option value="yes">Oui</option>
+              <option value="no">Non</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Espèce non native -->
+      <div class="conditional" id="panel-non-native">
+        <div class="subsection" style="margin-top:12px;">
+          <div class="subsection-title">⚠️ Espèce non native – Risques &amp; restrictions</div>
+          <div class="row">
+            <div class="col-4">
+              <div class="form-group">
+                <label class="form-label" for="evaluation_risque">Évaluation des risques réalisée ?</label>
+                <select id="evaluation_risque">
+                  <option value="">(aucun)</option>
+                  <option value="yes">Oui</option>
+                  <option value="no">Non</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label class="form-label" for="etablie_sauvage">Espèce établie en milieu naturel ?</label>
+                <select id="etablie_sauvage">
+                  <option value="">(aucun)</option>
+                  <option value="yes">Oui</option>
+                  <option value="no">Non</option>
+                  <option value="unknown">Inconnu</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label class="form-label" for="impact_biodiv">Impact négatif sur la biodiversité locale et les écosystèmes ?</label>
+                <select id="impact_biodiv">
+                  <option value="">(aucun)</option>
+                  <option value="yes">Oui, il y a déjà eu des impacts négatifs</option>
+                  <option value="no">Non, il n'y a pas de risques reconnus d'impacts négatifs</option>
+                  <option value="unknown">L'espèce a le potentiel d'avoir des impacts négatifs</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <div class="form-group">
+                <label class="form-label" for="culture_restreinte">Culture restreinte dans votre pays ?</label>
+                <select id="culture_restreinte" onchange="toggleCultureDetails()">
+                  <option value="">(aucun)</option>
+                  <option value="yes">Oui</option>
+                  <option value="no">Non</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-8">
+              <div class="conditional" id="panel-culture-details">
+                <div class="form-group">
+                  <label class="form-label" for="culture_details">Préciser les restrictions</label>
+                  <textarea id="culture_details" placeholder="Zone géographique, cadre réglementaire…"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Changement climatique -->
+      <div class="row" style="margin-top:12px;">
+        <div class="col-4">
+          <div class="form-group">
+            <label class="form-label" for="impact_climatique">Le changement climatique impacte-t-il cette espèce (stock sauvage ou types élevés) ?</label>
+            <select id="impact_climatique" onchange="toggleClimat()">
+              <option value="">(aucun)</option>
+              <option value="yes">Oui</option>
+              <option value="no">Non</option>
+              <option value="unknown">Inconnu</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-8">
+          <div class="conditional" id="panel-climat-details">
+            <div class="form-group">
+              <label class="form-label" for="impact_climatique_details">Détails (changement climatique)</label>
+              <textarea id="impact_climatique_details" placeholder="Décrivez les impacts observés…"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Production aquacole -->
+    <div class="card-section">
+      <div class="section-title">🐠 Production aquacole</div>
+      <div class="row">
+        <div class="col-6">
+          <div class="form-group">
+            <label class="form-label">Objectifs d'élevage</label>
+            <div class="checkbox-group" id="objectif_elevage">
+              <label class="checkbox-item"><input type="checkbox" value="Alimentation humaine (consommation directe ou comme ingrédient)" onchange="toggleObjectifAutre()"> Alimentation humaine (consommation directe ou comme ingrédient)</label>
+              <label class="checkbox-item"><input type="checkbox" value="Alimentation animale" onchange="toggleObjectifAutre()"> Alimentation animale</label>
+              <label class="checkbox-item"><input type="checkbox" value="Cosmétiques, produits pharmaceutiques et nutraceutiques" onchange="toggleObjectifAutre()"> Cosmétiques, produits pharmaceutiques et nutraceutiques</label>
+              <label class="checkbox-item"><input type="checkbox" value="Ornement / aquariophilie" onchange="toggleObjectifAutre()"> Ornement / aquariophilie</label>
+              <label class="checkbox-item"><input type="checkbox" value="Autre" onchange="toggleObjectifAutre()"> Autre</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="conditional" id="panel-objectif-autre" style="margin-bottom:12px;">
+            <div class="form-group">
+              <label class="form-label" for="objectif_autre">Si 'Autre', précisez</label>
+              <input type="text" id="objectif_autre" placeholder="Décrire l'objectif…">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="systeme_culture">Système de culture le plus courant</label>
+            <input type="text" id="systeme_culture" placeholder="Cage, bassin, filière…">
+          </div>
+        </div>
+      </div>
+
+      <hr class="subtle">
+
+      <div class="subsection">
+        <div class="subsection-title">📦 Production aquacole totale (produit primaire)</div>
+        <div class="row">
+          <div class="col-3">
+            <div class="form-group">
+              <label class="form-label" for="prod_volume">Volume (tonnes)</label>
+              <input type="number" id="prod_volume" min="0" step="1" placeholder="">
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label class="form-label" for="prod_valeur">Valeur (USD)</label>
+              <input type="number" id="prod_valeur" min="0" step="1000" placeholder="">
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label class="form-label" for="annee_ref">Année de référence</label>
+              <input type="number" id="annee_ref" min="1990" max="2030" step="1" placeholder="">
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label class="form-label" for="coherence_fao">Cohérent avec les données FAO / FishstatJ ?</label>
+              <select id="coherence_fao">
+                <option value="">(aucun)</option>
+                <option value="yes">Oui</option>
+                <option value="no">Non</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="source_info">Détails sur la source des informations</label>
+          <textarea id="source_info" placeholder="ex. Données Agreste 2023, rapport FranceAgrimer…"></textarea>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">🔄 Produits secondaires (alternatifs et additionnels)</div>
+        <div id="produits-secondaires-wrap"></div>
+        <button class="btn-add-item" onclick="addProduit()">＋ Ajouter un produit secondaire</button>
+      </div>
+
+      <hr class="subtle">
+      <div class="row">
+        <div class="col-6">
+          <div class="form-group">
+            <label class="form-label" for="tendance_prod">Tendance de la production aquacole (10 dernières années)</label>
+            <select id="tendance_prod">
+              <option value=""></option>
+              <option>En déclin</option>
+              <option>Disparu</option>
+              <option>Fluctuant</option>
+              <option>En augmentation</option>
+              <option>N'est plus produit</option>
+              <option>Inconnu</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Types génétiques -->
+    <div class="card-section">
+      <div class="section-title">🧬 Types génétiques reconnaissables</div>
+      <div class="row">
+        <div class="col-4">
+          <div class="form-group">
+            <label class="form-label" for="types_reconnus">Types génétiques reconnaissables pour cette espèce ?</label>
+            <select id="types_reconnus">
+              <option value="">(aucun)</option>
+              <option value="yes">Oui</option>
+              <option value="no">Non</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stocks sauvages -->
+    <div class="card-section">
+      <div class="section-title">🌊 Stocks sauvages</div>
+      <div class="row">
+        <div class="col-4">
+          <div class="form-group">
+            <label class="form-label" for="recolte_sauvage">Espèce également récoltée de populations sauvages ?</label>
+            <select id="recolte_sauvage" onchange="toggleSauvage()">
+              <option value="">(aucun)</option>
+              <option value="yes">Oui</option>
+              <option value="no">Non</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="conditional" id="panel-sauvage">
+        <div class="subsection" style="margin-top:12px;">
+          <div class="subsection-title">🎣 Production issue de la pêche sauvage (produit primaire)</div>
+          <div class="row">
+            <div class="col-3">
+              <div class="form-group">
+                <label class="form-label" for="peche_volume">Volume récolté (tonnes)</label>
+                <input type="number" id="peche_volume" min="0" step="1" placeholder="">
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <label class="form-label" for="peche_valeur">Valeur récoltée (USD)</label>
+                <input type="number" id="peche_valeur" min="0" step="1000" placeholder="">
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <label class="form-label" for="peche_annee">Année de référence</label>
+                <input type="number" id="peche_annee" min="1990" max="2030" step="1" placeholder="">
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <label class="form-label" for="peche_coherence_fao">Cohérent avec les données FAO / FishstatJ ?</label>
+                <select id="peche_coherence_fao">
+                  <option value="">(aucun)</option>
+                  <option value="yes">Oui</option>
+                  <option value="no">Non</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="subsection" style="background:#fff; border-left:2px solid #aac;">
+            <div class="subsection-title">Produits secondaires (pêche sauvage)</div>
+            <div id="produits-peche-wrap"></div>
+            <button class="btn-add-item" onclick="addProduitPeche()">＋ Ajouter un produit secondaire (pêche)</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <div class="col-4">
+            <div class="form-group">
+              <label class="form-label" for="tendance_peche">Tendance actuelle de la récolte (10 dernières années)</label>
+              <select id="tendance_peche">
+                <option value=""></option>
+                <option>En déclin</option>
+                <option>Disparu</option>
+                <option>Fluctuant</option>
+                <option>En augmentation</option>
+                <option>N'est plus produit</option>
+                <option>Inconnu</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label class="form-label" for="usage_sauvage">Principal usage du produit sauvage récolté</label>
+              <select id="usage_sauvage">
+                <option value="">(aucun)</option>
+                <option>Alimentation humaine (consommation directe ou comme ingrédient)</option>
+                <option>Alimentation animale</option>
+                <option>Cosmétiques, produits pharmaceutiques et nutraceutiques</option>
+                <option>Ornement / aquariophilie</option>
+                <option>Autre</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label class="form-label" for="type_pecherie">Type de pêcherie principal</label>
+              <select id="type_pecherie">
+                <option value=""></option>
+                <option>Pêche commerciale</option>
+                <option>Pêche artisanale</option>
+                <option>Pêche récréative</option>
+                <option>Pêche de subsistance</option>
+                <option>Pêche scientifique</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-4">
+            <div class="form-group">
+              <label class="form-label" for="statut_habitat">Statut de l'habitat / aire de répartition</label>
+              <select id="statut_habitat">
+                <option value="">(aucun)</option>
+                <option>Stable</option>
+                <option>En expansion</option>
+                <option>En contraction</option>
+                <option>Inconnu</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label class="form-label" for="evaluation_iucn">Risque d'extinction – Liste Rouge UICN ?</label>
+              <select id="evaluation_iucn" onchange="toggleIUCN()">
+                <option value="">(aucun)</option>
+                <option>Non évalué</option>
+                <option>Préoccupation mineure (LC)</option>
+                <option>Quasi menacé (NT)</option>
+                <option>Vulnérable (VU)</option>
+                <option>En danger (EN)</option>
+                <option>En danger critique (CR)</option>
+                <option>Éteint à l'état sauvage (EW)</option>
+                <option>Éteint (EX)</option>
+                <option>Données insuffisantes (DD)</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="conditional" id="panel-categorie-menace">
+              <div class="form-group">
+                <label class="form-label" for="categorie_menace">Catégorie d'extinction / menace assignée ?</label>
+                <select id="categorie_menace">
+                  <option value=""></option>
+                  <option>Non évalué</option>
+                  <option>Préoccupation mineure (LC)</option>
+                  <option>Quasi menacé (NT)</option>
+                  <option>Vulnérable (VU)</option>
+                  <option>En danger (EN)</option>
+                  <option>En danger critique (CR)</option>
+                  <option>Éteint à l'état sauvage (EW)</option>
+                  <option>Éteint (EX)</option>
+                  <option>Données insuffisantes (DD)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="unites_gestion">Unités de gestion / évaluation reconnues dans votre pays ?</label>
+              <select id="unites_gestion">
+                <option value="">(aucun)</option>
+                <option value="yes">Oui</option>
+                <option value="no">Non</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="stocks_genetiques">Stocks génétiques identifiés dans votre pays ?</label>
+              <select id="stocks_genetiques">
+                <option value="">(aucun)</option>
+                <option value="yes">Oui</option>
+                <option value="no">Non</option>
+                <option value="unknown">Inconnu</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:right; margin-top:8px;">
+      <button class="btn-tab-nav" onclick="switchTab('tab-recap', document.querySelectorAll('.tab-btn')[1]); buildRecap();">
+        📄 Voir le récapitulatif →
+      </button>
+    </div>
+
+  </div><!-- /tab-espece -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       ONGLET 2 – RÉCAPITULATIF
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-recap">
+
+    <div class="card-section">
+      <div class="section-title">📝 Récapitulatif des données saisies</div>
+      <div id="recap-content">
+        <div class="info-alert">Remplissez le formulaire dans l'onglet "Espèce" puis revenez ici pour visualiser et exporter vos données.</div>
+      </div>
+    </div>
+
+    <hr class="subtle">
+
+    <div class="card-section">
+      <div class="section-title">📧 Télécharger et envoyer votre fiche</div>
+
+      <div class="step-wrap">
+        <div class="step-num">1</div>
+        <div style="flex:1;">
+          <div style="font-weight:600; color:var(--blue); margin-bottom:6px;">Exportez vos données</div>
+          <div style="font-size:.86rem; color:#666; margin-bottom:10px;">Téléchargez un fichier Excel formaté de vos données, prêt à être envoyé.</div>
+          <div class="export-actions">
+            <button class="btn-primary" onclick="exportExcel()">⬇ Télécharger Excel</button>
+          </div>
+        </div>
+      </div>
+
+      <hr class="subtle">
+
+      <div class="step-wrap">
+        <div class="step-num alt">2</div>
+        <div style="flex:1;">
+          <div style="font-weight:600; color:var(--blue); margin-bottom:6px;">Envoyez le fichier par e-mail</div>
+          <div class="mail-box">
+            📎 Joignez le fichier exporté à un e-mail et envoyez-le à <strong>alexandra.pizzagalli@ifremer.fr</strong>
+            <br><br>
+            <span style="font-size:.82rem; color:#666;">Objet suggéré : AquaGRIS – [Nom de l'espèce] – [Date]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-recap -->
+
+</div><!-- /container -->
+
+<!-- TOAST -->
+<div id="toast">✅ Copié !</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// Données
+// ─────────────────────────────────────────────────────────────────────────────
+const ESPECES = {
+  "Poissons marins": [
+    "Sparus aurata – Daurade royale",
+    "Dicentrarchus labrax – Bar européen",
+    "Scophthalmus maximus – Turbot",
+    "Solea solea – Sole commune",
+    "Argyrosomus regius – Maigre",
+    "Thunnus thynnus – Thon rouge",
+    "Gadus morhua – Cabillaud"
+  ],
+  "Poissons d'eau douce et euryhalins": [
+    "Salmo salar – Saumon atlantique",
+    "Oncorhynchus mykiss – Truite arc-en-ciel",
+    "Cyprinus carpio – Carpe commune",
+    "Anguilla anguilla – Anguille européenne",
+    "Silurus glanis – Silure glane"
+  ],
+  "Mollusques": [
+    "Crassostrea gigas – Huître creuse",
+    "Ostrea edulis – Huître plate",
+    "Mytilus edulis – Moule commune",
+    "Mytilus galloprovincialis – Moule méditerranéenne",
+    "Pecten maximus – Coquille Saint-Jacques",
+    "Haliotis tuberculata – Ormeau"
+  ],
+  "Crustacés": [
+    "Penaeus vannamei – Crevette vannamei",
+    "Penaeus monodon – Crevette géante",
+    "Homarus gammarus – Homard européen",
+    "Carcinus maenas – Crabe vert"
+  ],
+  "Algues et plantes aquatiques": [
+    "Undaria pinnatifida – Wakame",
+    "Saccharina latissima – Kombu royal",
+    "Palmaria palmata – Dulse",
+    "Porphyra umbilicalis – Nori",
+    "Gracilaria spp.",
+    "Ulva lactuca – Laitue de mer"
+  ],
+  "Animaux aquatiques divers": [
+    "Apostichopus japonicus – Concombre de mer",
+    "Paracentrotus lividus – Oursin violet",
+    "Sepia officinalis – Seiche commune",
+    "Octopus vulgaris – Pieuvre commune"
+  ]
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tabs
+// ─────────────────────────────────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'tab-recap') buildRecap();
+}
+
+// (updateEspeces supprimé – nom_espece est maintenant un champ texte libre)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Conditional panels
+// ─────────────────────────────────────────────────────────────────────────────
+function toggleNonNative() {
+  toggle('panel-non-native', v('espece_native') === 'no');
+  updateProgress();
+}
+function toggleCultureDetails() {
+  toggle('panel-culture-details', v('culture_restreinte') === 'yes');
+}
+function toggleClimat() {
+  toggle('panel-climat-details', v('impact_climatique') === 'yes');
+}
+function toggleObjectifAutre() {
+  const checked = [...document.querySelectorAll('#objectif_elevage input:checked')]
+    .map(i => i.value);
+  toggle('panel-objectif-autre', checked.includes('Autre'));
+  updateProgress();
+}
+function toggleSauvage() {
+  toggle('panel-sauvage', v('recolte_sauvage') === 'yes');
+  updateProgress();
+}
+function toggleIUCN() {
+  const val = v('evaluation_iucn');
+  toggle('panel-categorie-menace', val !== '' && val !== '(aucun)');
+}
+
+function toggle(id, show) {
+  const el = document.getElementById(id);
+  if (show) el.classList.add('visible');
+  else      el.classList.remove('visible');
+}
+function v(id) {
+  const el = document.getElementById(id);
+  return el ? el.value : '';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dynamic produits
+// ─────────────────────────────────────────────────────────────────────────────
+let nProduits = 0, nProduitsPeche = 0;
+
+function addProduit() {
+  nProduits++;
+  const wrap = document.getElementById('produits-secondaires-wrap');
+  const div  = document.createElement('div');
+  div.className = 'dynamic-item';
+  div.id = 'prod-item-' + nProduits;
+  const i = nProduits;
+  div.innerHTML = `
+    <button class="btn-remove-item" onclick="removeItem('prod-item-${i}')" title="Supprimer">✕</button>
+    <div class="row">
+      <div class="col-4">
+        <div class="form-group">
+          <label class="form-label">Nom du produit ${i}</label>
+          <input type="text" id="prod_sec_nom_${i}" placeholder="ex. Farine, huile, naissains…">
+        </div>
+      </div>
+      <div class="col-8">
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="prod_sec_desc_${i}" placeholder="Nature, valorisation, quantité estimée…"></textarea>
+        </div>
+      </div>
+    </div>`;
+  wrap.appendChild(div);
+}
+
+function addProduitPeche() {
+  nProduitsPeche++;
+  const wrap = document.getElementById('produits-peche-wrap');
+  const div  = document.createElement('div');
+  div.className = 'dynamic-item';
+  div.id = 'peche-item-' + nProduitsPeche;
+  const i = nProduitsPeche;
+  div.innerHTML = `
+    <button class="btn-remove-item" onclick="removeItem('peche-item-${i}')" title="Supprimer">✕</button>
+    <div class="row">
+      <div class="col-4">
+        <div class="form-group">
+          <label class="form-label">Nom du produit ${i}</label>
+          <input type="text" id="peche_sec_nom_${i}" placeholder="ex. Farine, huile, peau…">
+        </div>
+      </div>
+      <div class="col-8">
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="peche_sec_desc_${i}" placeholder="Nature, valorisation…"></textarea>
+        </div>
+      </div>
+    </div>`;
+  wrap.appendChild(div);
+}
+
+function removeItem(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Progress
+// ─────────────────────────────────────────────────────────────────────────────
+function updateProgress() {
+  const fields = [
+    v('groupe_taxo')     !== '',
+    v('nom_espece')      !== '',
+    [...document.querySelectorAll('#objectif_elevage input:checked')].length > 0,
+    v('prod_volume')     !== '',
+    v('prod_valeur')     !== '',
+    v('recolte_sauvage') !== '' && v('recolte_sauvage') !== '(aucun)'
+  ];
+  const pct = Math.round(100 * fields.filter(Boolean).length / fields.length);
+  document.getElementById('prog-bar').style.width   = pct + '%';
+  document.getElementById('prog-label').textContent = `Progression du formulaire : ${pct}%`;
+}
+
+// Attach progress listeners
+document.addEventListener('DOMContentLoaded', () => {
+  ['groupe_taxo','nom_espece','prod_volume','prod_valeur','recolte_sauvage']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', updateProgress);
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Collect data
+// ─────────────────────────────────────────────────────────────────────────────
+function collectData() {
+  const checkboxes = (id) => [...document.querySelectorAll(`#${id} input:checked`)].map(i => i.value);
+
+  const prodSec = [];
+  document.querySelectorAll('[id^="prod-item-"]').forEach((el, i) => {
+    const idx = el.id.replace('prod-item-', '');
+    prodSec.push({
+      nom:  (document.getElementById(`prod_sec_nom_${idx}`) || {}).value || '',
+      desc: (document.getElementById(`prod_sec_desc_${idx}`) || {}).value || ''
+    });
+  });
+
+  const pecheSec = [];
+  document.querySelectorAll('[id^="peche-item-"]').forEach((el) => {
+    const idx = el.id.replace('peche-item-', '');
+    pecheSec.push({
+      nom:  (document.getElementById(`peche_sec_nom_${idx}`) || {}).value || '',
+      desc: (document.getElementById(`peche_sec_desc_${idx}`) || {}).value || ''
+    });
+  });
+
+  return {
+    contact:                   v('contact'),
+    email:                     v('email'),
+    groupe_taxo:               v('groupe_taxo'),
+    nom_espece:                v('nom_espece'),
+    nom_commun:                v('nom_commun'),
+    espece_native:             v('espece_native'),
+    evaluation_risque:         v('evaluation_risque'),
+    etablie_sauvage:           v('etablie_sauvage'),
+    impact_biodiv:             v('impact_biodiv'),
+    culture_restreinte:        v('culture_restreinte'),
+    culture_details:           v('culture_details'),
+    impact_climatique:         v('impact_climatique'),
+    impact_climatique_details: v('impact_climatique_details'),
+    objectif_elevage:          checkboxes('objectif_elevage'),
+    objectif_autre:            v('objectif_autre'),
+    systeme_culture:           v('systeme_culture'),
+    prod_volume:               v('prod_volume'),
+    prod_valeur:               v('prod_valeur'),
+    annee_ref:                 v('annee_ref'),
+    coherence_fao:             v('coherence_fao'),
+    source_info:               v('source_info'),
+    produits_secondaires:      prodSec,
+    tendance_prod:             v('tendance_prod'),
+    types_reconnus:            v('types_reconnus'),
+    recolte_sauvage:           v('recolte_sauvage'),
+    peche_volume:              v('peche_volume'),
+    peche_valeur:              v('peche_valeur'),
+    peche_annee:               v('peche_annee'),
+    peche_coherence_fao:       v('peche_coherence_fao'),
+    produits_peche:            pecheSec,
+    tendance_peche:            v('tendance_peche'),
+    usage_sauvage:             v('usage_sauvage'),
+    type_pecherie:             v('type_pecherie'),
+    statut_habitat:            v('statut_habitat'),
+    evaluation_iucn:           v('evaluation_iucn'),
+    categorie_menace:          v('categorie_menace'),
+    unites_gestion:            v('unites_gestion'),
+    stocks_genetiques:         v('stocks_genetiques')
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Récapitulatif HTML
+// ─────────────────────────────────────────────────────────────────────────────
+function fmt(val) {
+  if (!val || (Array.isArray(val) && val.length === 0) || val === '' || val === '(aucun)')
+    return '<span class="recap-empty">—</span>';
+  if (Array.isArray(val)) return val.join(', ');
+  return String(val);
+}
+
+function recapSection(title, icon, rows) {
+  const trs = rows.map(([label, val]) =>
+    `<tr><td>${label}</td><td>${fmt(val)}</td></tr>`
+  ).join('');
+  return `
+    <div class="recap-section-title">${icon} ${title}</div>
+    <table class="recap-table"><tbody>${trs}</tbody></table>`;
+}
+
+function buildRecap() {
+  const s   = collectData();
+  const isNN = s.espece_native === 'no';
+  const isSauvage = s.recolte_sauvage === 'yes';
+
+  let html = `
+    <div class="recap-header">🐟 FORMULAIRE ESPÈCE – AquaGRIS</div>
+    <div class="recap-body">
+    ${recapSection('Identification du déclarant', '🌍', [
+      ['NOM Prénom', s.contact],
+      ['Email',      s.email]
+    ])}
+    ${recapSection('Espèce', '🔬', [
+      ['Groupe taxonomique',              s.groupe_taxo],
+      ["Nom de l'espèce",                s.nom_espece],
+      ['Nom commun officiel',             s.nom_commun],
+      ['Espèce native dans votre pays ?', s.espece_native === 'yes' ? 'Oui' : s.espece_native === 'no' ? 'Non' : '']
+    ])}`;
+
+  if (isNN) {
+    html += recapSection('Espèce non native – Risques & restrictions', '⚠️', [
+      ['Évaluation des risques réalisée ?',   s.evaluation_risque === 'yes' ? 'Oui' : s.evaluation_risque === 'no' ? 'Non' : ''],
+      ['Espèce établie en milieu naturel ?',  s.etablie_sauvage],
+      ['Impact négatif sur la biodiversité ?',s.impact_biodiv],
+      ['Culture restreinte dans votre pays ?',s.culture_restreinte === 'yes' ? 'Oui' : s.culture_restreinte === 'no' ? 'Non' : ''],
+      ['Précisions restrictions',             s.culture_details]
+    ]);
+  }
+
+  html += recapSection('Changement climatique', '🌡️', [
+    ['Le changement climatique impacte-t-il cette espèce ?', s.impact_climatique],
+    ['Détails (changement climatique)',                      s.impact_climatique_details]
+  ]);
+
+  const objLabel = s.objectif_elevage.length > 0
+    ? s.objectif_elevage.join(', ') + (s.objectif_autre ? ' | ' + s.objectif_autre : '')
+    : '';
+  html += recapSection('Production aquacole', '🐠', [
+    ["Principaux objectifs d'élevage",        objLabel],
+    ['Système de culture le plus courant',    s.systeme_culture],
+    ['Volume de production (tonnes)',         s.prod_volume],
+    ['Valeur de production (USD)',            s.prod_valeur],
+    ['Année de référence',                    s.annee_ref],
+    ['Cohérent avec les données FAO / FishstatJ ?', s.coherence_fao === 'yes' ? 'Oui' : s.coherence_fao === 'no' ? 'Non' : ''],
+    ['Source des informations',               s.source_info],
+    ['Tendance de la production (10 ans)',    s.tendance_prod]
+  ]);
+
+  if (s.produits_secondaires.length > 0) {
+    const rows = s.produits_secondaires.map((p, i) => [`Produit ${i+1}`, p.nom + (p.desc ? ' – ' + p.desc : '')]);
+    html += recapSection('Produits secondaires aquaculture', '🔄', rows);
+  }
+
+  html += recapSection('Types génétiques reconnaissables', '🧬', [
+    ["Types génétiques reconnaissables pour cette espèce ?", s.types_reconnus === 'yes' ? 'Oui' : s.types_reconnus === 'no' ? 'Non' : '']
+  ]);
+
+  const sauvageRows = [["Espèce également récoltée de populations sauvages ?", s.recolte_sauvage === 'yes' ? 'Oui' : s.recolte_sauvage === 'no' ? 'Non' : '']];
+  if (isSauvage) {
+    sauvageRows.push(
+      ['Volume récolté (tonnes)',                        s.peche_volume],
+      ['Valeur récoltée (USD)',                          s.peche_valeur],
+      ['Année de référence (pêche)',                     s.peche_annee],
+      ['Cohérent avec les données FAO ?',               s.peche_coherence_fao === 'yes' ? 'Oui' : s.peche_coherence_fao === 'no' ? 'Non' : ''],
+      ['Tendance actuelle de la récolte (10 ans)',       s.tendance_peche],
+      ['Principal usage du produit sauvage',            s.usage_sauvage],
+      ['Type de pêcherie principal',                    s.type_pecherie],
+      ["Statut de l'habitat / aire de répartition",    s.statut_habitat],
+      ["Risque d'extinction – Liste Rouge UICN",        s.evaluation_iucn],
+      ['Unités de gestion reconnues dans votre pays ?', s.unites_gestion === 'yes' ? 'Oui' : s.unites_gestion === 'no' ? 'Non' : ''],
+      ['Stocks génétiques identifiés dans votre pays ?',s.stocks_genetiques]
+    );
+    if (s.produits_peche.length > 0)
+      s.produits_peche.forEach((p, i) =>
+        sauvageRows.push([`Produit pêche ${i+1}`, p.nom + (p.desc ? ' – ' + p.desc : '')])
+      );
+  }
+  html += recapSection('Stocks sauvages', '🌊', sauvageRows);
+
+  html += '</div>';
+  document.getElementById('recap-content').innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Export Excel (SheetJS) – même mise en forme que le R Shiny openxlsx
+// ─────────────────────────────────────────────────────────────────────────────
+function exportExcel() {
+  const s = collectData();
+  const isNN      = s.espece_native === 'no';
+  const isSauvage = s.recolte_sauvage === 'yes';
+
+  const fmtVal = (v) => {
+    if (!v || v === '' || v === '(aucun)') return '—';
+    if (Array.isArray(v)) return v.join(' | ') || '—';
+    if (v === 'yes') return 'Oui';
+    if (v === 'no')  return 'Non';
+    return String(v);
+  };
+
+  const lignes = [];
+  const add = (section, label, val) => lignes.push({ section, label, valeur: fmtVal(val) });
+
+  add('Identification du déclarant', 'NOM Prénom', s.contact);
+  add(null, 'Email', s.email);
+  add('Espèce', 'Groupe taxonomique', s.groupe_taxo);
+  add(null, "Nom de l'espèce", s.nom_espece);
+  add(null, 'Nom commun officiel', s.nom_commun);
+  add(null, 'Espèce native dans votre pays ?', s.espece_native);
+
+  if (isNN) {
+    add('Espèce non native – Risques & restrictions', 'Évaluation des risques réalisée ?', s.evaluation_risque);
+    add(null, 'Espèce établie en milieu naturel ?', s.etablie_sauvage);
+    add(null, 'Impact négatif sur la biodiversité ?', s.impact_biodiv);
+    add(null, 'Culture restreinte dans votre pays ?', s.culture_restreinte);
+    add(null, 'Précisions restrictions', s.culture_details);
+  }
+
+  add('Changement climatique', 'Le changement climatique impacte-t-il cette espèce ?', s.impact_climatique);
+  add(null, 'Détails (changement climatique)', s.impact_climatique_details);
+
+  const objLabel = s.objectif_elevage.length > 0
+    ? s.objectif_elevage.join(' | ') + (s.objectif_autre ? ' | ' + s.objectif_autre : '')
+    : '';
+  add("Production aquacole", "Principaux objectifs d'élevage", objLabel);
+  add(null, 'Système de culture le plus courant', s.systeme_culture);
+  add(null, 'Volume de production (tonnes)', s.prod_volume);
+  add(null, 'Valeur de production (USD)', s.prod_valeur);
+  add(null, 'Année de référence', s.annee_ref);
+  add(null, 'Cohérent avec les données FAO / FishstatJ ?', s.coherence_fao);
+  add(null, 'Source des informations', s.source_info);
+  add(null, 'Tendance de la production (10 ans)', s.tendance_prod);
+
+  if (s.produits_secondaires.length > 0) {
+    s.produits_secondaires.forEach((p, i) => {
+      add(i === 0 ? 'Produits secondaires aquaculture' : null, 'Produit ' + (i+1), p.nom + (p.desc ? ' – ' + p.desc : ''));
+    });
+  }
+
+  add("Types d'élevage reconnaissables", "Types d'élevage reconnaissables pour cette espèce ?", s.types_reconnus);
+  add('Stocks sauvages', 'Espèce également récoltée de populations sauvages ?', s.recolte_sauvage);
+
+  if (isSauvage) {
+    add(null, 'Volume récolté (tonnes)', s.peche_volume);
+    add(null, 'Valeur récoltée (USD)', s.peche_valeur);
+    add(null, 'Année de référence (pêche)', s.peche_annee);
+    add(null, 'Cohérent avec les données FAO ?', s.peche_coherence_fao);
+    add(null, 'Tendance actuelle de la récolte (10 ans)', s.tendance_peche);
+    add(null, 'Principal usage du produit sauvage', s.usage_sauvage);
+    add(null, 'Type de pêcherie principal', s.type_pecherie);
+    add(null, "Statut de l'habitat / aire de répartition", s.statut_habitat);
+    add(null, "Risque d'extinction – Liste Rouge UICN", s.evaluation_iucn);
+    add(null, 'Unités de gestion reconnues dans votre pays ?', s.unites_gestion);
+    add(null, 'Stocks génétiques identifiés dans votre pays ?', s.stocks_genetiques);
+    if (s.produits_peche.length > 0) {
+      s.produits_peche.forEach((p, i) => {
+        add(null, 'Produit pêche ' + (i+1), p.nom + (p.desc ? ' – ' + p.desc : ''));
+      });
+    }
+  }
+
+  // Build worksheet data
+  const wsData  = [];
+  const merges  = [];
+  const rowMeta = [];
+
+  wsData.push(['FORMULAIRE ESPÈCE – AquaGRIS', '']);
+  merges.push({ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } });
+  rowMeta.push('titre');
+
+  let currentSection = '';
+  lignes.forEach(lg => {
+    if (lg.section && lg.section !== currentSection) {
+      currentSection = lg.section;
+      wsData.push(['', '']);
+      rowMeta.push('spacer');
+      merges.push({ s: { r: wsData.length - 1, c: 0 }, e: { r: wsData.length - 1, c: 1 } });
+      wsData.push([currentSection, '']);
+      merges.push({ s: { r: wsData.length - 1, c: 0 }, e: { r: wsData.length - 1, c: 1 } });
+      rowMeta.push('section');
+    }
+    wsData.push([lg.label, lg.valeur]);
+    rowMeta.push(lg.valeur === '—' ? 'vide' : 'data');
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!merges'] = merges;
+  ws['!cols'] = [{ wch: 52 }, { wch: 60 }];
+
+  const rowH = rowMeta.map(t => {
+    if (t === 'titre')   return { hpt: 22 };
+    if (t === 'section') return { hpt: 18 };
+    if (t === 'spacer')  return { hpt: 6 };
+    return { hpt: 15 };
+  });
+  ws['!rows'] = rowH;
+
+  const BLEU    = '1a6b8a';
+  const BLEU_BG = 'e8f4f8';
+  const GRIS    = 'f5f5f5';
+  const WHITE   = 'FFFFFF';
+
+  function styleCell(r, c, style) {
+    const addr = XLSX.utils.encode_cell({ r, c });
+    if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+    ws[addr].s = style;
+  }
+
+  const sTitre   = { font: { name: 'Calibri', sz: 14, bold: true, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: BLEU } },    alignment: { horizontal: 'left', vertical: 'center' }, border: { bottom: { style: 'medium', color: { rgb: BLEU } } } };
+  const sSection = { font: { name: 'Calibri', sz: 10, bold: true, color: { rgb: BLEU } },     fill: { fgColor: { rgb: BLEU_BG } }, alignment: { horizontal: 'left', vertical: 'center' }, border: { bottom: { style: 'thin',   color: { rgb: BLEU } } } };
+  const sLabel   = { font: { name: 'Calibri', sz: 10, bold: true, color: { rgb: '333333' } }, fill: { fgColor: { rgb: GRIS } },    alignment: { horizontal: 'left', vertical: 'top', wrapText: true } };
+  const sValeur  = { font: { name: 'Calibri', sz: 10,             color: { rgb: '111111' } }, fill: { fgColor: { rgb: WHITE } },   alignment: { horizontal: 'left', vertical: 'top', wrapText: true } };
+  const sVide    = { font: { name: 'Calibri', sz: 10, italic: true, color: { rgb: 'aaaaaa' } }, fill: { fgColor: { rgb: WHITE } }, alignment: { horizontal: 'left', vertical: 'top', wrapText: true } };
+  const sBlank   = { fill: { fgColor: { rgb: WHITE } } };
+
+  rowMeta.forEach((t, r) => {
+    if      (t === 'titre')   { styleCell(r, 0, sTitre);   styleCell(r, 1, sTitre); }
+    else if (t === 'section') { styleCell(r, 0, sSection); styleCell(r, 1, sSection); }
+    else if (t === 'spacer')  { styleCell(r, 0, sBlank);   styleCell(r, 1, sBlank); }
+    else                      { styleCell(r, 0, sLabel);   styleCell(r, 1, t === 'vide' ? sVide : sValeur); }
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Espèce');
+
+  const espece = s.nom_espece ? s.nom_espece.replace(/[^A-Za-z0-9]/g, '_').slice(0, 30) : 'espece';
+  const date   = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  XLSX.writeFile(wb, 'AquaGRIS_Espece_' + espece + '_' + date + '.xlsx');
+}
+
+  const s = collectData();
+  const rows = [
+    ['Section', 'Champ', 'Valeur'],
+    ['Identification', 'NOM Prénom',  s.contact],
+    ['Identification', 'Email',       s.email],
+    ['Espèce', 'Groupe taxonomique',  s.groupe_taxo],
+    ['Espèce', "Nom de l'espèce",     s.nom_espece],
+    ['Espèce', 'Nom commun',          s.nom_commun],
+    ['Espèce', 'Espèce native ?',     s.espece_native],
+    ['Non native', 'Évaluation risque', s.evaluation_risque],
+    ['Non native', 'Établie milieu naturel', s.etablie_sauvage],
+    ['Non native', 'Impact biodiversité',    s.impact_biodiv],
+    ['Non native', 'Culture restreinte',     s.culture_restreinte],
+    ['Non native', 'Détails restrictions',   s.culture_details],
+    ['Climat', 'Impact climatique',          s.impact_climatique],
+    ['Climat', 'Détails climatique',         s.impact_climatique_details],
+    ['Production', "Objectifs d'élevage",    s.objectif_elevage.join(' | ')],
+    ['Production', 'Objectif autre',         s.objectif_autre],
+    ['Production', 'Système de culture',     s.systeme_culture],
+    ['Production', 'Volume (t)',             s.prod_volume],
+    ['Production', 'Valeur (USD)',           s.prod_valeur],
+    ['Production', 'Année de référence',     s.annee_ref],
+    ['Production', 'Cohérence FAO',         s.coherence_fao],
+    ['Production', 'Source informations',    s.source_info],
+    ['Production', 'Tendance production',    s.tendance_prod],
+    ['Types génétiques', 'Types reconnaissables', s.types_reconnus],
+    ['Stocks sauvages', 'Récolte sauvage',   s.recolte_sauvage],
+    ['Stocks sauvages', 'Volume pêche (t)',  s.peche_volume],
+    ['Stocks sauvages', 'Valeur pêche (USD)',s.peche_valeur],
+    ['Stocks sauvages', 'Année pêche',       s.peche_annee],
+    ['Stocks sauvages', 'Cohérence FAO pêche',s.peche_coherence_fao],
+    ['Stocks sauvages', 'Tendance pêche',    s.tendance_peche],
+    ['Stocks sauvages', 'Usage sauvage',     s.usage_sauvage],
+    ['Stocks sauvages', 'Type pêcherie',     s.type_pecherie],
+    ['Stocks sauvages', "Statut habitat",    s.statut_habitat],
+    ['Stocks sauvages', 'Évaluation UICN',   s.evaluation_iucn],
+    ['Stocks sauvages', 'Catégorie menace',  s.categorie_menace],
+    ['Stocks sauvages', 'Unités de gestion', s.unites_gestion],
+    ['Stocks sauvages', 'Stocks génétiques', s.stocks_genetiques]
+  ];
+
+  s.produits_secondaires.forEach((p, i) => {
+    rows.push([`Produit sec. ${i+1}`, 'Nom',         p.nom]);
+    rows.push([`Produit sec. ${i+1}`, 'Description', p.desc]);
+  });
+  s.produits_peche.forEach((p, i) => {
+    rows.push([`Produit pêche ${i+1}`, 'Nom',         p.nom]);
+    rows.push([`Produit pêche ${i+1}`, 'Description', p.desc]);
+  });
+
+  const csv = rows.map(r =>
+    r.map(cell => '"' + String(cell || '').replace(/"/g, '""') + '"').join(',')
+  ).join('\r\n');
+
+  const espece = s.nom_espece ? s.nom_espece.replace(/[^A-Za-z0-9]/g, '_').slice(0,30) : 'espece';
+  const date   = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const fname  = `AquaGRIS_Espece_${espece}_${date}.csv`;
+
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+
+<style media="print">
+  .tabs, .btn-primary, .btn-tab-nav, .btn-add-item, .btn-remove-item,
+  .export-actions, .step-wrap, #toast { display: none !important; }
+  .tab-panel { display: block !important; }
+  .card-section { box-shadow: none; border: 1px solid #ccc; }
+  .fao-header { border-radius: 0; }
+</style>
+
+</body>
+</html>
